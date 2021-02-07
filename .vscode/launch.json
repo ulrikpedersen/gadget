@@ -37,7 +37,7 @@
                 "interface/stlink-v2-1.cfg",
                 "target/stm32f3x.cfg"
             ],
-            "svdFile": "${workspaceRoot}/.vscode/STM32F303.svd",
+            "svdFile": "${env:HOME}/Documents/Rust dev/en.stm32f3_svd/STM32F3_svd_V1.2/STM32F303.svd",
             "swoConfig": {
                 "enabled": true,
                 "cpuFrequency": 8000000,
