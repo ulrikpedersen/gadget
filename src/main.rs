@@ -9,8 +9,9 @@ use panic_halt as _; // you can put a breakpoint on `rust_begin_unwind` to catch
 
 use cortex_m::asm;
 use cortex_m_rt::entry;
-use stm32f3xx_hal::{prelude::*, stm32, Delay, i2c};
+use stm32f3xx_hal::{prelude::*, stm32, i2c};
 use stm32f3xx_hal::gpio::gpiob;
+use stm32f3xx_hal::delay::Delay;
 
 #[entry]
 fn main() -> ! {
