@@ -14,7 +14,7 @@ use stm32f3xx_hal::gpio::gpiob;
 
 #[entry]
 fn main() -> ! {
-    let peripherals = stm32::Peripherals::take()::unwrap();
+    let peripherals = stm32::Peripherals::take().unwrap();
     
     loop {
         // your code goes here
