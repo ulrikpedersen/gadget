@@ -24,6 +24,10 @@ panic-halt = "0.2.0"
 # features = ["stm32f303", "rt"]
 # version = "0.7.1"
 
+[dependencies.stm32f3xx-hal]
+features = ["stm32f303xc", "rt"]
+version = "0.6.1"
+
 # this lets you use `cargo fix`!
 [[bin]]
 name = "gadget"
