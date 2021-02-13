@@ -47,7 +47,10 @@ jobs:
       #   with:
       #     command: clippy
       #     args: -- -D warnings
-
+  
+  clippy_check:
+    runs-on: ubuntu-20.04
+    steps:
       - uses: actions-rs/clippy-check@v1
         name: "cargo clippy -- --all-features"
         with:
