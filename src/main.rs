@@ -12,8 +12,9 @@ use cortex_m_rt::entry;
 use stm32f3xx_hal::{prelude::*, stm32, i2c};
 //use stm32f3xx_hal::gpio::gpiob;
 use stm32f3xx_hal::delay::Delay;
+use bme280::BME280;
 
-use cortex_m_semihosting::{hprintln, debug};
+use cortex_m_semihosting::hprintln;
 
 #[entry]
 fn main() -> ! {
@@ -21,9 +22,9 @@ fn main() -> ! {
     // rcc: reset clock control
     let mut rcc = peripherals.RCC.constrain();
     let core_peripherals = cortex_m::Peripherals::take().unwrap();
-    let mut flash = peripherals.FLASH.constrain();
-    let clocks = rcc.cfgr.freeze(&mut flash.acr);
-    let mut delay = Delay::new(core_peripherals.SYST, clocks);
+    let mut flash = peripherals.FLASH.constrain();  // why do we need this flash?
+    let clocks = rcc.cfgr.freeze(&mut flash.acr);   // what does the 'freeze' function do?
+    let delay = Delay::new(core_peripherals.SYST, clocks);
     let mut gpiob = peripherals.GPIOB.split(&mut rcc.ahb);
 
     // Configure the I2C pins and bus
@@ -33,10 +34,18 @@ fn main() -> ! {
     let sda = gpiob.pb7.into_af4(&mut gpiob.moder, &mut gpiob.afrl);
     let i2c = i2c::I2c::new(peripherals.I2C1, (scl, sda), 400.khz(), clocks, &mut rcc.apb1);
 
+    // Temperature, humidity and pressure sensor on i2c bus...
+    let mut bme280 = BME280::new_primary(i2c, delay);
+    // initialize the sensor
+    bme280.init().unwrap();
 
     loop {
-        // your code goes here
-        hprintln!(".").unwrap();
-        delay.delay_ms(1000_u16);
+        // measure temperature, pressure, and humidity
+        let measurements = bme280.measure().unwrap();
+        hprintln!("{}% {} deg C {} pascals", 
+            measurements.humidity, 
+            measurements.temperature, 
+            measurements.pressure)
+            .unwrap();
     }
 }
