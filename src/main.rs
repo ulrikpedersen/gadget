@@ -38,14 +38,15 @@ fn main() -> ! {
     let mut bme280 = BME280::new_primary(i2c, delay);
     // initialize the sensor
     bme280.init().unwrap();
-
+    let mut _measurements = bme280.measure().unwrap();
+    
     loop {
         // measure temperature, pressure, and humidity
-        let measurements = bme280.measure().unwrap();
-        hprintln!("{}% {} deg C {} pascals", 
-            measurements.humidity, 
-            measurements.temperature, 
-            measurements.pressure)
-            .unwrap();
+        _measurements = bme280.measure().unwrap();
+        // hprintln!("{}% {} deg C {} pascals", 
+        //     _measurements.humidity, 
+        //     _measurements.temperature, 
+        //     _measurements.pressure)
+        //     .unwrap();
     }
 }
