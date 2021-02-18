@@ -29,10 +29,10 @@ monitor arm semihosting enable
 # # OR: make the microcontroller SWO pin output compatible with UART (8N1)
 # # 8000000 must match the core clock frequency
 # # 2000000 is the frequency of the SWO pin
-# monitor tpiu config external uart off 8000000 2000000
+monitor tpiu config external uart off 8000000 2000000
 
 # # enable ITM port 0
-# monitor itm port 0 on
+monitor itm port 0 on
 
 load
 

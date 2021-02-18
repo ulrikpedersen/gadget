@@ -3,6 +3,8 @@
      * Requires the Rust Language Server (RLS) and Cortex-Debug extensions
      * https://marketplace.visualstudio.com/items?itemName=rust-lang.rust
      * https://marketplace.visualstudio.com/items?itemName=marus25.cortex-debug
+
+       Documentation for the cortex-debug fields: https://lonesometraveler.github.io/2020/03/27/debug.html 
      */
     "version": "0.2.0",
     "configurations": [
@@ -30,8 +32,6 @@
             "preLaunchTask": "Cargo Build (debug)",
             "runToMain": true,
             "executable": "./target/thumbv7em-none-eabihf/debug/gadget",
-            /* Run `cargo build --example itm` and uncomment this line to run itm example */
-            // "executable": "./target/thumbv7em-none-eabihf/debug/examples/itm",
             "device": "STM32F303VCT6",
             "configFiles": [
                 "interface/stlink-v2-1.cfg",
