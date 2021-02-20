@@ -59,5 +59,36 @@
             "problemMatcher": [],
             "group": "build"
         },
+        {
+            "label": "Cargo size binary (release)",
+            "type": "process",
+            "command": "cargo",
+            "args": [
+                "size",
+                "--bin",
+                "gadget",
+                "--release",
+                "--",
+                "-A"
+            ],
+            "problemMatcher": [
+                "$rustc"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "OpenOCD program flash (release)",
+            "type": "process",
+            "dependsOn": [
+                "Cargo size binary (release)"
+            ],
+            "command": "openocd",
+            "args": [
+                "-f",
+                "openocd_program_flash.cfg",
+            ],
+            "group": "build",
+            "problemMatcher": []
+        }
     ]
 }
