@@ -76,5 +76,8 @@ fn main() -> ! {
             _measurements.temperature, 
             _measurements.pressure);
     }
-    panic!("We should never get here - we've fallen out of an infinite loop!");
+    
+    #[allow(unreachable_code)] {
+        panic!("We should never get here - we've fallen out of an infinite loop!");
+    }
 }
