@@ -12,6 +12,10 @@ This template includes launch configurations for debugging CortexM programs with
 See [.vscode/README.md](./.vscode/README.md) for more information.  
 If you're not using VS Code, you can safely delete the directory from the generated project.
 
+## My Weather Station
+
+![Gif of my weather station in action](docs/myweatherstation.gif?raw=true "Weather Station in action!")
+
 # License
 
 This project is licensed under
