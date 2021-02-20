@@ -9,6 +9,7 @@ use panic_itm as _; // logs messages over ITM; requires ITM support
 
 //use cortex_m::asm;
 use cortex_m_rt::entry;
+use core::fmt::Write;   // Required by the ssd1306 TerminalMode to use write! macro and string formatting
 
 use stm32f3xx_hal::{prelude::*, stm32, i2c};
 //use stm32f3xx_hal::gpio::gpiob;
@@ -27,7 +28,9 @@ use cortex_m_log::{
 use log::{info, warn};
 
 // Our application specific hardware drivers
+use shared_bus::BusManagerSimple;
 use bme280::BME280;  // The temperature, humidity and pressure sensor
+use ssd1306::{prelude::*, Builder, I2CDIBuilder};  // oled display
 
 #[entry]
 fn main() -> ! {
@@ -59,24 +62,42 @@ fn main() -> ! {
     let scl = gpiob.pb6.into_af4(&mut gpiob.moder, &mut gpiob.afrl);
     let sda = gpiob.pb7.into_af4(&mut gpiob.moder, &mut gpiob.afrl);
     let i2c = i2c::I2c::new(peripherals.I2C1, (scl, sda), 400.khz(), clocks, &mut rcc.apb1);
+    let i2c_bus_manager = BusManagerSimple::new(i2c);
 
+    info!("Configuring the bme280 sensor driver");
     // Temperature, humidity and pressure sensor on i2c bus...
-    let mut bme280 = BME280::new_primary(i2c, delay);
+    let mut bme280 = BME280::new_primary(i2c_bus_manager.acquire_i2c(), delay);
     // initialize the sensor
     bme280.init().unwrap();
 
+    info!("Configuring ssd1306 oled display driver");
+    let interface = I2CDIBuilder::new().init(i2c_bus_manager.acquire_i2c());
+    let mut disp: TerminalMode<_, _> = Builder::new().connect(interface).into();
+    disp.init().unwrap();
+    let _ = disp.clear();
+    let _ = disp.write_str("Display is live!");
+
     info!("Let's take the temperature!");
     let mut _measurements = bme280.measure().unwrap();
-    
+    let _ = disp.clear();
     loop {
+        // Reset the text position to top left to over-write from the previous iteration.
+        // Works better than disp.clear which makes the display flicker.
+        let _ = disp.set_position(0, 0);
         // measure temperature, pressure, and humidity
         _measurements = bme280.measure().unwrap();
         info!("{}% {} deg C {} pa", 
             _measurements.humidity, 
             _measurements.temperature, 
             _measurements.pressure);
+        // Write the data to oled display. Set fixed width fields in formatting.
+        let _ = write!(disp, 
+            "{humidity:>9.2}%\n\n{temp:>9.2} degC\n\n{pressure:>8.1} pa", 
+            humidity=_measurements.humidity, 
+            temp=_measurements.temperature, 
+            pressure=_measurements.pressure);
     }
-    
+
     #[allow(unreachable_code)] {
         panic!("We should never get here - we've fallen out of an infinite loop!");
     }
