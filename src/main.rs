@@ -27,6 +27,10 @@ use cortex_m_log::{
 };
 use log::{info, warn};
 
+// LEDs on the discovery board
+use stm32f3_discovery::leds::Leds;
+use stm32f3_discovery::switch_hal::OutputSwitch;
+
 // Our application specific hardware drivers
 use shared_bus::BusManagerSimple;
 use bme280::BME280;  // The temperature, humidity and pressure sensor
@@ -77,25 +81,41 @@ fn main() -> ! {
     let _ = disp.clear();
     let _ = disp.write_str("Display is live!");
 
+    info!("Configuring the Discovery board user LEDs");
+    let mut gpioe = peripherals.GPIOE.split(&mut rcc.ahb);
+    let leds = Leds::new(
+        gpioe.pe8,  gpioe.pe9,  gpioe.pe10, gpioe.pe11,
+        gpioe.pe12, gpioe.pe13, gpioe.pe14, gpioe.pe15,
+        &mut gpioe.moder, &mut gpioe.otyper,
+    );
+    let mut led_circle = leds.into_array();
+
     info!("Let's take the temperature!");
     let mut _measurements = bme280.measure().unwrap();
     let _ = disp.clear();
     loop {
-        // Reset the text position to top left to over-write from the previous iteration.
-        // Works better than disp.clear which makes the display flicker.
-        let _ = disp.set_position(0, 0);
-        // measure temperature, pressure, and humidity
-        _measurements = bme280.measure().unwrap();
-        info!("{}% {} deg C {} pa", 
-            _measurements.humidity, 
-            _measurements.temperature, 
-            _measurements.pressure);
-        // Write the data to oled display. Set fixed width fields in formatting.
-        let _ = write!(disp, 
-            "{humidity:>9.2}%\n\n{temp:>9.2} degC\n\n{pressure:>8.1} pa", 
-            humidity=_measurements.humidity, 
-            temp=_measurements.temperature, 
-            pressure=_measurements.pressure);
+        for led in led_circle.iter_mut() {
+            // Light up the next LED (spinnning the circle)
+            led.on().ok();
+
+            // Reset the text position to top left to over-write from the previous iteration.
+            // Works better than disp.clear which makes the display flicker.
+            let _ = disp.set_position(0, 0);
+            // measure temperature, pressure, and humidity
+            _measurements = bme280.measure().unwrap();
+            info!("{}% {} deg C {} pa", 
+                _measurements.humidity, 
+                _measurements.temperature, 
+                _measurements.pressure);
+            // Write the data to oled display. Set fixed width fields in formatting.
+            let _ = write!(disp, 
+                "{humidity:>9.2}%\n\n{temp:>9.2} degC\n\n{pressure:>8.1} pa", 
+                humidity=_measurements.humidity, 
+                temp=_measurements.temperature, 
+                pressure=_measurements.pressure);
+
+            led.off().ok();
+        }
     }
 
     #[allow(unreachable_code)] {
