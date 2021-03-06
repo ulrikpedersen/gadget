@@ -4,6 +4,15 @@ edition = "2018"
 readme = "README.md"
 name = "gadget"
 version = "0.1.0"
+description = "Board support package for the STM32F3DISCOVERY board"
+repository = "https://github.com/ulrikpedersen/gadget"
+documentation = "https://github.com/ulrikpedersen/gadget/blob/main/README.md"
+categories = ["embedded", "no-std"]
+keywords = ["discovery", "stm32f3", "gadget"]
+license = "Apache-2.0"
+exclude = [
+    ".vscode/*",
+]
 
 [dependencies]
 cortex-m = "0.6.0"
