@@ -15,16 +15,16 @@ exclude = [
 ]
 
 [dependencies]
-cortex-m = "0.7"
+cortex-m = "0.6.7"
 cortex-m-rt = "0.6.13"
 # cortex-m-semihosting = "0.3.3"
 panic-halt = "0.2.0"
-panic-itm = "0.4.2"
+panic-itm = "0.4.1"
 stm32f3-discovery = "0.6.0"
 
 log = { version = "0.4.14" }
 lazy_static = { version = "1.4.0", features = ["spin_no_std"] }
-cortex-m-log = { version = "0.7.0", features = ["itm", "log-integration"] }
+cortex-m-log = { version = "0.6.2", features = ["itm", "log-integration"] }
 
 shared-bus = "0.2.0"  # shared-bus for sharing i2c between multiple device drivers: https://blog.rahix.de/001-shared-bus/
 bme280 = "0.2.1"
