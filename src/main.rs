@@ -11,8 +11,8 @@ use panic_itm as _; // logs messages over ITM; requires ITM support
 use cortex_m_rt::entry;
 use core::fmt::Write;   // Required by the ssd1306 TerminalMode to use write! macro and string formatting
 
-use stm32f3xx_hal::{prelude::*, stm32, i2c};
-//use stm32f3xx_hal::gpio::gpiob;
+use stm32f3xx_hal::{prelude::*, stm32, i2c, pac};
+use stm32f3xx_hal::spi::{Mode, Phase, Polarity, Spi};
 use stm32f3xx_hal::delay::Delay;
 
 // For logging
@@ -46,6 +46,7 @@ fn main() -> ! {
     let clocks = rcc.cfgr.freeze(&mut flash.acr);   // what does the 'freeze' function do?
     let delay = Delay::new(core_peripherals.SYST, clocks);
     let mut gpiob = peripherals.GPIOB.split(&mut rcc.ahb);
+    let mut gpioa = peripherals.GPIOA.split(&mut rcc.ahb);
 
     // Setting up the logging framework. Steals the ITM so it can't be used directly!
     lazy_static! {
@@ -90,6 +91,40 @@ fn main() -> ! {
     );
     let mut led_circle = leds.into_array();
 
+    info!("Configuring SPI on PA5, PA5 and PA7");
+    let sck = gpioa.pa5.into_af5(&mut gpioa.moder, &mut gpioa.afrl);
+    let miso = gpioa.pa6.into_af5(&mut gpioa.moder, &mut gpioa.afrl);
+    let mosi = gpioa.pa7.into_af5(&mut gpioa.moder, &mut gpioa.afrl);
+
+    let spi_mode = Mode {
+        polarity: Polarity::IdleLow,
+        phase: Phase::CaptureOnFirstTransition,
+    };
+
+    // NOTE: have to explicitly tell the compiler the type here. 
+    //       It doesn't know what WORD is (can be u8 or maybe u16 I guess...)
+    let mut spi : Spi<_, _, u8> = Spi::spi1(
+                peripherals.SPI1,
+                (sck, miso, mosi),
+                spi_mode,
+                3.mhz(),
+                clocks,
+                &mut rcc.apb2,
+            );
+
+    info!("sending 0xDEADBEEF via spi..");
+    // Create an `u8` array, which can be transfered via SPI.
+    let msg_send: [u8; 8] = [0xD, 0xE, 0xA, 0xD, 0xB, 0xE, 0xE, 0xF];
+    // Copy the array, as it would be mutually shared in `transfer` while simultaneously would be
+    // immutable shared in `assert_eq`.
+    let mut msg_sending = msg_send;
+    // Transfer the content of the array via SPI and receive it's output.
+    // When MOSI and MISO pins are connected together, `msg_received` should receive the content.
+    // from `msg_sending`
+    let msg_received = spi.transfer(&mut msg_sending).unwrap();
+    info!("msg_received: {:#?}", msg_received);
+
+    
     info!("Let's take the temperature!");
     let mut _measurements = bme280.measure().unwrap();
     let _ = disp.clear();
